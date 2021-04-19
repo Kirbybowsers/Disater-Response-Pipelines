@@ -1,4 +1,4 @@
-# Disater-Response-Pipelines
+# Disater-Response-Pipelines Summary
 ### Table of Contents
 
 1. [Installation](#installation)

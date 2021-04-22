@@ -5,6 +5,7 @@
 2. [Project Motivation](#motivation)
 3. [File Description](#descriptions)
 4. [Instruction](#descriptions)
+5. [Licensing, Authors, Acknowledgements](#licensing)
 
 
 ## Installation <a name="installation"></a>
@@ -54,7 +55,9 @@ The project has three components:
 3. **Flask Web App:** the web app enables the user to enter a disaster message, and then view the categories of the message.
 
 The web app also contains some visualizations that help users understand more about the data 
+Here is a screemshot of one of the graphs: 
 
+![disaster graph1](Disaster_Project_1.jpg)
 
 
 ## Instructions:<a name="instructions"></a>
@@ -70,3 +73,7 @@ The web app also contains some visualizations that help users understand more ab
 
 3. Go to http://0.0.0.0:3001/
 
+
+## Licensing, Authors, Acknowledgements<a name="licensing"></a>
+
+Credits must be given to Udacity for the starter codes and FigureEight for provding the data used by this project. 

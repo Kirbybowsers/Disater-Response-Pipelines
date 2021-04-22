@@ -57,7 +57,7 @@ The project has three components:
 The web app also contains some visualizations that help users understand more about the data 
 Here is a screemshot of one of the graphs: 
 
-![disaster graph1](Disaster Project_1.png)
+![disaster graph1](Disaster Project_1.PNG)
 
 
 ## Instructions:<a name="instructions"></a>

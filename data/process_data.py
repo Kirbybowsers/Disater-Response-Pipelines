@@ -2,82 +2,71 @@
 import sys
 import pandas as pd
 from sqlalchemy import create_engine
-import os
-
 def load_data(messages_filepath, categories_filepath):
-    """Load the original dataset
-    Load the dataset from the specific file, and transform the dataset into the 
-    same dataframe
-    Parameters:
-    -----------
-    messages_filepath: string
-        File path is about messages data
-    categories_filepath: string
-        File path is about categories data
-    
-    Results:
-    df: DataFrame
-        Dataset is loaded from the messages and the categories dataset
     """
+    Function: load data from message and categories csv files and merge them
+    Args：
+      messages_filepath(str): messages file path
+      categories_filepath(str): categories files path
+    Return：
+       df： merge messages and categories
+    """
+    # load messages dataset
     messages = pd.read_csv(messages_filepath)
+    # load categories dataset
     categories = pd.read_csv(categories_filepath)
-
-    # merge the dataframe
-    df = messages.merge(categories, on="id")
-
+    # merge datasets
+    df = messages.merge(categories, on='id')
     return df
 
 def clean_data(df):
-    """Wrangle data
-    
-    Wrangle the dataframe
-    Parameters:
-    df: DataFrame
-        DataFrame contains all data infromation
-    
-    Returns:
-    df: DataFrame
-        After cleaning the dataframe, return itself
     """
-    # extract the categories info
-    category = df["categories"].str.split(";", expand=True)
+    Function: clean data
+    Args:
+        df(pd.dataframe):raw dataset
+    Return:
+        df(pd.dataframe):clean dataset
+    """
+    # create a dataframe of the 36 individual category columns
+    categories = df['categories'].str.split(";", expand=True)
 
-    category_colnames = category.iloc[0, :].apply(lambda x: x.split("-")[0])
-    category.columns = category_colnames
+    # select the first row of the categories dataframe
+    row = categories.loc[0,:]
 
-    for column in category:
-        # parse the value from the string
-        category[column] = category[column].apply(lambda x: x.split("-")[1])
-        category[column] = pd.to_numeric(category[column])
+    # use this row to extract a list of new column names for categories.
+    category_colnames = row.apply(lambda x:x.split('-')[0]).values.tolist()
 
-    # concate the category info and the dataframe
-    df.drop("categories", axis=1, inplace=True)
+    # rename the columns of `categories`
+    categories.columns = category_colnames
 
-    df = pd.concat([df, category], axis=1)
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] =  categories[column].apply(lambda x:x.split('-')[1])
+        # convert column from string to numeric
+        categories[column] = categories[column].astype(int)
+        # Check number not in (0,1) and update other value to 1
+        categories.loc[categories[column]>1,column] = 1
+
+    # drop the original categories column from `df`
+    df.drop('categories',axis=1, inplace=True)
+
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df,categories], axis=1)
 
     # drop duplicates
-    if df.duplicated().sum() > 0:
-        df.drop_duplicates(inplace=True)
-
+    df.drop_duplicates(inplace=True)
     return df
 
 def save_data(df, database_filename):
-    """Save the dataset
-    After cleaning the dataset, store the data into the SQLite database
-    Paramters:
-    ----------
-    df: DataFrame
-        Cleaning data
-    database_filename: String
-        File path is about the database stored the data
     """
-    engine = create_engine("sqlite:///" + database_filename)
-    db_name = os.path.basename(database_filename).split(".")[0]
-    try:
-        df.to_sql(db_name, engine, index=False)
-    except ValueError as error:
-        print(error)
-
+    Function: save clean data
+    Args:
+        df(pd.dataframe):clean dataset
+    Return:
+        N/A
+    """
+    engine = create_engine('sqlite:///'+database_filename)
+    df.to_sql("disastertab", engine, index=False,if_exists='replace')
 
 def main():
     if len(sys.argv) == 4:
@@ -90,12 +79,12 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
-        
+
         print('Cleaned data saved to database!')
-    
+
     else:
         print('Please provide the filepaths of the messages and categories '\
               'datasets as the first and second argument respectively, as '\
